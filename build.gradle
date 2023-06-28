@@ -25,7 +25,7 @@ dependencies {
 }
 
 application {
-	mainClass = 'net.yarik.todolist.TodolistApplication'
+	mainClass = 'net.yarik.todolist.LisdoonchatApplication'
 }
 
 tasks.named('test') {
