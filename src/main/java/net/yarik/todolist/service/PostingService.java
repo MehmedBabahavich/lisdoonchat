@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PostService {
+public class PostingService {
 
     @Autowired
     private PostRepository postRepository;
@@ -31,5 +31,7 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    public void createComment() {}
+    public Comment createComment(Comment comment) {
+        return commentRepository.save(comment);
+    }
 }
