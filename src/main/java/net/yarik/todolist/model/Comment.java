@@ -17,8 +17,8 @@ public class Comment {
     @Column(name = "body")
     private String body;
 
-    @Column(name = "imagePath")
-    private String imagePath;
+    @Column(name = "imageName")
+    private String imageName;
 
     @Column(name = "createdAt")
     private String createdAt;
@@ -26,11 +26,11 @@ public class Comment {
     public Comment() {
     }
 
-    public Comment(Long id, Long postId, String body, String imagePath, String createdAt) {
+    public Comment(Long id, Long postId, String body, String imageName, String createdAt) {
         this.id = id;
         this.postId = postId;
         this.body = body;
-        this.imagePath = imagePath;
+        this.imageName = imageName;
         this.createdAt = createdAt;
     }
 
@@ -58,12 +58,12 @@ public class Comment {
         this.body = body;
     }
 
-    public String getImagePath() {
-        return imagePath;
+    public String getImageName() {
+        return imageName;
     }
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
+    public void setImageName(String imagePath) {
+        this.imageName = imageName;
     }
 
     public String getCreatedAt() {
