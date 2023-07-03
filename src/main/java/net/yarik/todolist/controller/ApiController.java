@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -32,17 +31,24 @@ public class ApiController {
     private StorageService storageService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/posts")
-    public ResponseEntity getAllPosts(@RequestParam("page") Integer pageNum) {
+    public ResponseEntity getAllPosts() {
         log.info("requested GET on /api/posts");
         return ResponseEntity.ok()
-                .body(postingService.getAllPosts(pageNum));
+                .body(postingService.getAllPosts());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/posts/{id}")
+    public ResponseEntity getPostById(@PathVariable("id") Long id) {
+        log.info("requested GET on /api/posts/" + id);
+        return ResponseEntity.ok()
+                .body(postingService.getPostById(id));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/comments/{post_id}")
-    public ResponseEntity getAllPostComments(@PathVariable("post_id") Long postId,
-                                             @RequestParam("page") Integer pageNum) {
+    public ResponseEntity getAllPostComments(@PathVariable("post_id") Long postId) {
         log.info("requested GET on /api/comments/" + postId);
-        return ResponseEntity.ok(postingService.getAllPostComments(postId, pageNum));
+        return ResponseEntity.ok()
+                .body(postingService.getAllPostComments(postId));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/posts", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -50,6 +56,13 @@ public class ApiController {
                                      @RequestParam(name = "body") String postBody,
                                      @RequestParam(name = "image") MultipartFile file) throws IOException {
         log.info("requested POST on /api/posts");
+
+        String fileType = getFileExtension(file.getOriginalFilename());
+        log.info(fileType);
+        if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
+            return ResponseEntity.badRequest().body("unsupported media type");
+        }
+
         Post post = new Post();
 
         String fileName = storageService.uploadFileToFileSystem(file);
@@ -82,6 +95,13 @@ public class ApiController {
                                         @RequestParam(name = "body") Comment commentBody,
                                         @RequestParam(name = "image") MultipartFile file) throws IOException {
         log.info("requested POST on /api/comments/" + postId);
+
+        String fileType = getFileExtension(file.getOriginalFilename());
+        log.info(fileType);
+        if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
+            return ResponseEntity.badRequest().body("unsupported media type");
+        }
+
         Comment comment = new Comment();
 
         String fileName = storageService.uploadFileToFileSystem(file);
@@ -113,5 +133,13 @@ public class ApiController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+    }
+
+    private String getFileExtension(String filename) {
+        int dotIndex = filename.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < filename.length() - 1) {
+            return filename.substring(dotIndex);
+        }
+        return "";
     }
 }

@@ -73,7 +73,6 @@ public class StorageService {
 
     private boolean fileExists(String fileName) {
 
-        log.info("searching for fileNames...");
         if ((postRepository.findByImageName(fileName).isEmpty()) && (commentRepository.findByImageName(fileName).isEmpty())) {
             return false;
         }

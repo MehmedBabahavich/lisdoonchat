@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostingService {
@@ -22,16 +23,19 @@ public class PostingService {
     private CommentRepository commentRepository;
 
 
-    public List<Post> getAllPosts(Integer pageNumber) {
-        Pageable pageOfSizeTen = PageRequest.of(pageNumber, 10);
+    public List<Post> getAllPosts() {
 
-        return postRepository.findAllPageable(pageOfSizeTen);
+        return postRepository.findAll();
     }
 
-    public List<Comment> getAllPostComments(Long postId, Integer pageNumber) {
-        Pageable pageOfSizeTen = PageRequest.of(pageNumber, 10);
+    public Optional<Post> getPostById(Long id) {
 
-        return commentRepository.findByPostId(postId, pageOfSizeTen);
+        return postRepository.findById(id);
+    }
+
+    public List<Comment> getAllPostComments(Long postId) {
+
+        return commentRepository.findByPostId(postId);
     }
 
     public Post createPost(Post post) {

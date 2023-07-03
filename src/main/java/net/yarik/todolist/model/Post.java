@@ -2,6 +2,8 @@ package net.yarik.todolist.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -23,10 +25,11 @@ public class Post {
     @Column(name = "createdAt")
     private String createdAt;
 
+
     public Post() {
     }
 
-    public Post(Long id, String title, String body, String imageName, String createdAt) {
+    public Post(Long id, String title, String body, String imageName, String createdAt, LocalDateTime lastBumpTime) {
         this.id = id;
         this.title = title;
         this.body = body;
