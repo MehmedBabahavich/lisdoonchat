@@ -14,7 +14,7 @@ public class Comment {
     @Column(name = "postId")
     private Long postId;
 
-    @Column(name = "body")
+    @Column(name = "body", length = 1024)
     private String body;
 
     @Column(name = "imageName")

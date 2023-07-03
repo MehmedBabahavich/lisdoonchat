@@ -5,7 +5,10 @@ import net.yarik.todolist.model.Post;
 import net.yarik.todolist.repository.CommentRepository;
 import net.yarik.todolist.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -19,12 +22,16 @@ public class PostingService {
     private CommentRepository commentRepository;
 
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public List<Post> getAllPosts(Integer pageNumber) {
+        Pageable pageOfSizeTen = PageRequest.of(pageNumber, 10);
+
+        return postRepository.findAllPageable(pageOfSizeTen);
     }
 
-    public List<Comment> getAllPostComments(Long postId) {
-        return commentRepository.findByPostId(postId); // ?
+    public List<Comment> getAllPostComments(Long postId, Integer pageNumber) {
+        Pageable pageOfSizeTen = PageRequest.of(pageNumber, 10);
+
+        return commentRepository.findByPostId(postId, pageOfSizeTen);
     }
 
     public Post createPost(Post post) {

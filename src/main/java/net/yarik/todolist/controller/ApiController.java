@@ -32,16 +32,17 @@ public class ApiController {
     private StorageService storageService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/posts")
-    public ResponseEntity getAllPosts() {
+    public ResponseEntity getAllPosts(@RequestParam("page") Integer pageNum) {
         log.info("requested GET on /api/posts");
         return ResponseEntity.ok()
-                .body(postingService.getAllPosts());
+                .body(postingService.getAllPosts(pageNum));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/comments/{post_id}")
-    public ResponseEntity getAllPostComments(@PathVariable("post_id") Long postId) {
+    public ResponseEntity getAllPostComments(@PathVariable("post_id") Long postId,
+                                             @RequestParam("page") Integer pageNum) {
         log.info("requested GET on /api/comments/" + postId);
-        return ResponseEntity.ok(postingService.getAllPostComments(postId));
+        return ResponseEntity.ok(postingService.getAllPostComments(postId, pageNum));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/posts", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -50,8 +51,6 @@ public class ApiController {
                                      @RequestParam(name = "image") MultipartFile file) throws IOException {
         log.info("requested POST on /api/posts");
         Post post = new Post();
-
-        log.info("lenght of image: " + file.getBytes().length);
 
         String fileName = storageService.uploadFileToFileSystem(file);
 
