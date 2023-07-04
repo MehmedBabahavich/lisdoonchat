@@ -62,7 +62,7 @@ public class Comment {
         return imageName;
     }
 
-    public void setImageName(String imagePath) {
+    public void setImageName(String imageName) {
         this.imageName = imageName;
     }
 

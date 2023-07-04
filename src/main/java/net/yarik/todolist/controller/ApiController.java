@@ -54,30 +54,30 @@ public class ApiController {
     @RequestMapping(method = RequestMethod.POST, value = "/posts", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity createPost(@RequestParam(name = "title") String postTitle,
                                      @RequestParam(name = "body") String postBody,
-                                     @RequestParam(name = "image") MultipartFile file) throws IOException {
+                                     @RequestParam(name = "image", required = false) MultipartFile file) throws IOException {
         log.info("requested POST on /api/posts");
 
-        String fileType = getFileExtension(file.getOriginalFilename());
-        log.info(fileType);
-        if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
-            return ResponseEntity.badRequest().body("unsupported media type");
-        }
-
         Post post = new Post();
-
-        String fileName = storageService.uploadFileToFileSystem(file);
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm");
         String formattedNow = now.format(formatter);
 
-        log.info("file is saved at this time: " + formattedNow);
-        log.info("file is saved at: " + fileName);
+        String fileName = "";
+        if (file != null) {
+            String fileType = getFileExtension(file.getOriginalFilename());
+            log.info(fileType);
+            if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
+                return ResponseEntity.badRequest().body("unsupported media type");
+            }
+            fileName = storageService.uploadFileToFileSystem(file);
+        }
 
+        post.setImageName(fileName);
         post.setTitle(postTitle.toString());
         post.setBody(postBody.toString());
-        post.setImageName(fileName);
         post.setCreatedAt(formattedNow);
+        post.setLastBump(LocalDateTime.now());
 
         postingService.createPost(post);
 
@@ -86,33 +86,35 @@ public class ApiController {
         log.info("body: " + post.getBody());
         log.info("imageName: " + post.getImageName());
         log.info("createdAt: " + post.getCreatedAt());
+        log.info("bumpTime: " + post.getLastBump());
 
         return ResponseEntity.ok("Post created successfully");
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/comments/{post_id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity createComment(@PathVariable("post_id") Long postId,
-                                        @RequestParam(name = "body") Comment commentBody,
-                                        @RequestParam(name = "image") MultipartFile file) throws IOException {
+                                        @RequestParam(name = "body") String commentBody,
+                                        @RequestParam(name = "image", required = false) MultipartFile file) throws IOException {
         log.info("requested POST on /api/comments/" + postId);
 
-        String fileType = getFileExtension(file.getOriginalFilename());
-        log.info(fileType);
-        if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
-            return ResponseEntity.badRequest().body("unsupported media type");
-        }
-
         Comment comment = new Comment();
-
-        String fileName = storageService.uploadFileToFileSystem(file);
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm");
         String formattedNow = now.format(formatter);
 
+        String filename = "";
+        if (file != null) {
+            String fileType = getFileExtension(file.getOriginalFilename());
+            if (!fileType.equals(".png") && !fileType.equals(".jpg") && !fileType.equals(".jpeg")) {
+                return ResponseEntity.badRequest().body("unsupported media type");
+            }
+            filename = storageService.uploadFileToFileSystem(file);
+        }
+
+        comment.setImageName(filename);
         comment.setPostId(postId);
-        comment.setBody(commentBody.getBody());
-        comment.setImageName(fileName);
+        comment.setBody(commentBody);
         comment.setCreatedAt(formattedNow);
 
         postingService.createComment(comment);

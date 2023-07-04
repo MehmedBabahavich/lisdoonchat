@@ -25,16 +25,20 @@ public class Post {
     @Column(name = "createdAt")
     private String createdAt;
 
+    @Column(name = "lastBump")
+    private LocalDateTime lastBump;
+
 
     public Post() {
     }
 
-    public Post(Long id, String title, String body, String imageName, String createdAt, LocalDateTime lastBumpTime) {
+    public Post(Long id, String title, String body, String imageName, String createdAt, LocalDateTime lastBump) {
         this.id = id;
         this.title = title;
         this.body = body;
         this.imageName = imageName;
         this.createdAt = createdAt;
+        this.lastBump = lastBump;
     }
 
     public Long getId() {
@@ -75,5 +79,13 @@ public class Post {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getLastBump() {
+        return lastBump;
+    }
+
+    public void setLastBump(LocalDateTime lastBump) {
+        this.lastBump = lastBump;
     }
 }
