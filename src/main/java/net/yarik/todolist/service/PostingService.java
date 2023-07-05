@@ -56,6 +56,8 @@ public class PostingService {
         Optional<Post> originalPost = postRepository.findById(comment.getPostId());
         originalPost.ifPresent(post -> {
             post.setLastBump(LocalDateTime.now());
+            post.setCommentCount(post.getCommentCount() + 1L);
+
             postRepository.save(post);
         });
 

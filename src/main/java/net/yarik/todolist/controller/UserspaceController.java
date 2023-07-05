@@ -13,6 +13,11 @@ public class UserspaceController {
 
     private Logger log = LoggerFactory.getLogger(UserspaceController.class);
 
-
+    @RequestMapping(method = RequestMethod.GET, value = "/")
+    public ModelAndView chat() {
+        log.info("requested GET on /");
+        ModelAndView mv = new ModelAndView("index");
+        return mv;
+    }
 
 }

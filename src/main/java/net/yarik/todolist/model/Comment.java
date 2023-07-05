@@ -34,43 +34,23 @@ public class Comment {
         this.createdAt = createdAt;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getPostId() {
-        return postId;
-    }
+    public Long getPostId() { return postId; }
 
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
+    public void setPostId(Long postId) { this.postId = postId; }
 
-    public String getBody() {
-        return body;
-    }
+    public String getBody() { return body; }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
+    public void setBody(String body) { this.body = body; }
 
-    public String getImageName() {
-        return imageName;
-    }
+    public String getImageName() { return imageName; }
 
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
-    }
+    public void setImageName(String imageName) { this.imageName = imageName; }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
+    public String getCreatedAt() { return createdAt; }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

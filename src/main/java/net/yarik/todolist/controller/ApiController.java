@@ -78,6 +78,7 @@ public class ApiController {
         post.setBody(postBody.toString());
         post.setCreatedAt(formattedNow);
         post.setLastBump(LocalDateTime.now());
+        post.setCommentCount(0L);
 
         postingService.createPost(post);
 
