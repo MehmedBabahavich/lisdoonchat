@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -32,12 +33,17 @@ public class StorageService {
 
     private Logger log = LoggerFactory.getLogger(StorageService.class);
 
-    @Value("classpath:uploaded_images/")
-    private Resource imageUploadDirResource;
+
+    private String currentDirectory;
+
+    public StorageService() {
+        this.currentDirectory = System.getProperty("user.dir");
+        log.info("current dir is : " + currentDirectory);
+    }
 
     public String uploadFileToFileSystem(MultipartFile file) throws IOException {
 
-        String uploadDirPath = imageUploadDirResource.getFile().getAbsolutePath();
+        String uploadDirPath = currentDirectory + "/uploaded_images/";
         String generatedName = generateUniqueFileName(file.getOriginalFilename());
 
         Path filepath = Path.of(uploadDirPath, generatedName);
@@ -48,7 +54,7 @@ public class StorageService {
     }
 
     public byte[] downloadFileFromFileSystem(String fileName) throws IOException {
-        Resource resource = new ClassPathResource("uploaded_images/" + fileName);
+        Resource resource = new FileSystemResource(currentDirectory + "/uploaded_images/" + fileName);
         return FileCopyUtils.copyToByteArray(resource.getInputStream());
     }
 
@@ -76,7 +82,6 @@ public class StorageService {
         if ((postRepository.findByImageName(fileName).isEmpty()) && (commentRepository.findByImageName(fileName).isEmpty())) {
             return false;
         }
-
         return true;
     }
 }
