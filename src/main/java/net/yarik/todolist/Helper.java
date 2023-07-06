@@ -1,5 +1,11 @@
 package net.yarik.todolist;
 
+import net.yarik.todolist.repository.CommentRepository;
+import net.yarik.todolist.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.UUID;
+
 public class Helper {
 
     public static String getFileExtension(String filename) {

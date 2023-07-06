@@ -1,5 +1,6 @@
 package net.yarik.todolist.service;
 
+import net.yarik.todolist.Helper;
 import net.yarik.todolist.repository.CommentRepository;
 import net.yarik.todolist.repository.PostRepository;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class StorageService {
     }
 
     private String generateUniqueFileName(String originalFileName) {
-        String extension = getFileExtension(originalFileName);
+        String extension = Helper.getFileExtension(originalFileName);
 
         String uniqueName;
         do {
