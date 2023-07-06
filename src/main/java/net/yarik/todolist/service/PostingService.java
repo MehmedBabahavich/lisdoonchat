@@ -63,8 +63,6 @@ public class PostingService {
 
         String fileName = "";
         if (postImage != null) {
-            String fileType = Helper.getFileExtension(postImage.getOriginalFilename());
-            log.info(fileType);
             fileName = storageService.uploadFileToFileSystem(postImage);
         }
 
@@ -88,7 +86,6 @@ public class PostingService {
 
         String filename = "";
         if (commentImage != null) {
-            String fileType = Helper.getFileExtension(commentImage.getOriginalFilename());
             filename = storageService.uploadFileToFileSystem(commentImage);
         }
 
