@@ -93,6 +93,7 @@ public class PostingService {
         comment.setPostId(postId);
         comment.setBody(commentBody);
         comment.setCreatedAt(formattedNow);
+        comment.setRepliedToCommentId(repliedToCommentId);
 
         Comment savedComment = commentRepository.save(comment);
 

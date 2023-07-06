@@ -58,10 +58,11 @@ public class ApiController {
                                      @RequestParam(name = "image", required = false) MultipartFile postImage) throws IOException {
         log.info("requested POST on /api/posts");
 
-
-        String fileExtension = Helper.getFileExtension(postImage.getOriginalFilename());
-        if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
-            return ResponseEntity.badRequest().body("unsupported media type");
+        if (postImage != null) {
+            String fileExtension = Helper.getFileExtension(postImage.getOriginalFilename());
+            if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
+                return ResponseEntity.badRequest().body("unsupported media type");
+            }
         }
 
         Post createdPost = postingService.createPost(postTitle, postBody, postImage);
@@ -83,9 +84,11 @@ public class ApiController {
                                         @RequestParam(name = "image", required = false) MultipartFile commentImage) throws IOException {
         log.info("requested POST on /api/comments/" + postId);
 
-        String fileExtension = Helper.getFileExtension(commentImage.getOriginalFilename());
-        if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
-            return ResponseEntity.badRequest().body("unsupported media type");
+        if (commentImage != null) {
+            String fileExtension = Helper.getFileExtension(commentImage.getOriginalFilename());
+            if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
+                return ResponseEntity.badRequest().body("unsupported media type");
+            }
         }
 
         Comment savedComment = postingService.createComment(postId, commentBody, repliedToCommentId, commentImage);
