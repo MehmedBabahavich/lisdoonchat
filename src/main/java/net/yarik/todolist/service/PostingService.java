@@ -1,5 +1,6 @@
 package net.yarik.todolist.service;
 
+import net.yarik.todolist.Helper;
 import net.yarik.todolist.controller.ApiController;
 import net.yarik.todolist.model.Comment;
 import net.yarik.todolist.model.Post;
@@ -11,11 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +34,9 @@ public class PostingService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private StorageService storageService;
 
 
     public List<Post> getAllPosts() {
@@ -46,13 +54,51 @@ public class PostingService {
         return commentRepository.findByPostId(postId);
     }
 
-    public Post createPost(Post post) {
+    public Post createPost(String postTitle, String postBody, MultipartFile postImage) throws IOException {
+        Post post = new Post();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm");
+        String formattedNow = now.format(formatter);
+
+        String fileName = "";
+        if (postImage != null) {
+            String fileType = Helper.getFileExtension(postImage.getOriginalFilename());
+            log.info(fileType);
+            fileName = storageService.uploadFileToFileSystem(postImage);
+        }
+
+        post.setImageName(fileName);
+        post.setTitle(postTitle);
+        post.setBody(postBody);
+        post.setCreatedAt(formattedNow);
+        post.setLastBump(LocalDateTime.now());
+        post.setCommentCount(0L);
+
         return postRepository.save(post);
     }
 
     @Transactional
-    public Comment createComment(Comment comment) {
-        comment = commentRepository.save(comment);
+    public Comment createComment(Long postId, String commentBody, Long repliedToCommentId, MultipartFile commentImage) throws IOException {
+        Comment comment = new Comment();
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd HH:mm");
+        String formattedNow = now.format(formatter);
+
+        String filename = "";
+        if (commentImage != null) {
+            String fileType = Helper.getFileExtension(commentImage.getOriginalFilename());
+            filename = storageService.uploadFileToFileSystem(commentImage);
+        }
+
+        comment.setImageName(filename);
+        comment.setPostId(postId);
+        comment.setBody(commentBody);
+        comment.setCreatedAt(formattedNow);
+
+        Comment savedComment = commentRepository.save(comment);
+
 
         Optional<Post> originalPost = postRepository.findById(comment.getPostId());
         originalPost.ifPresent(post -> {
@@ -62,6 +108,6 @@ public class PostingService {
             postRepository.save(post);
         });
 
-        return comment;
+        return savedComment;
     }
 }

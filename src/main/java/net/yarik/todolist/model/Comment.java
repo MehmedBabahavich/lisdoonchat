@@ -23,15 +23,19 @@ public class Comment {
     @Column(name = "createdAt")
     private String createdAt;
 
+    @Column(name = "repliedTo")
+    private Long repliedToCommentId;
+
     public Comment() {
     }
 
-    public Comment(Long id, Long postId, String body, String imageName, String createdAt) {
+    public Comment(Long id, Long postId, String body, String imageName, String createdAt, Long repliedToCommentId) {
         this.id = id;
         this.postId = postId;
         this.body = body;
         this.imageName = imageName;
         this.createdAt = createdAt;
+        this.repliedToCommentId = repliedToCommentId;
     }
 
     public Long getId() { return id; }
@@ -53,4 +57,8 @@ public class Comment {
     public String getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public Long getRepliedToCommentId() { return repliedToCommentId; }
+
+    public void setRepliedToCommentId(Long repliedToCommentId) { this.repliedToCommentId = repliedToCommentId; }
 }
