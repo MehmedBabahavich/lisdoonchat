@@ -1,6 +1,7 @@
 package net.yarik.todolist.controller;
 
 import net.yarik.todolist.Helper;
+import net.yarik.todolist.exceptions.UserIsBannedException;
 import net.yarik.todolist.model.Comment;
 import net.yarik.todolist.model.Post;
 import net.yarik.todolist.service.PostingService;
@@ -55,52 +56,62 @@ public class ApiController {
     @RequestMapping(method = RequestMethod.POST, value = "/posts", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity createPost(@RequestParam(name = "title") String postTitle,
                                      @RequestParam(name = "body") String postBody,
-                                     @RequestParam(name = "image", required = false) MultipartFile postImage) throws IOException {
+                                     @RequestParam(name = "image", required = false) MultipartFile postImage,
+                                     @RequestParam(name = "token", required = false) String token) throws IOException {
         log.info("requested POST on /api/posts");
 
         if (postImage != null) {
-            String fileExtension = Helper.getFileExtension(postImage.getOriginalFilename());
+            String fileExtension = Helper.getFileExtension(postImage.getOriginalFilename()).toLowerCase();
             if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
                 return ResponseEntity.badRequest().body("unsupported media type");
             }
         }
 
-        Post createdPost = postingService.createPost(postTitle, postBody, postImage);
+        try {
+            Post createdPost = postingService.createPost(postTitle, postBody, postImage, token);
 
-        log.info("posted to database: \n");
-        log.info("title: " + createdPost.getTitle());
-        log.info("body: " + createdPost.getBody());
-        log.info("imageName: " + createdPost.getImageName());
-        log.info("createdAt: " + createdPost.getCreatedAt());
-        log.info("bumpTime: " + createdPost.getLastBump());
+            log.info("posted to database: \n");
+            log.info("title: " + createdPost.getTitle());
+            log.info("body: " + createdPost.getBody());
+            log.info("imageName: " + createdPost.getImageName());
+            log.info("createdAt: " + createdPost.getCreatedAt());
+            log.info("bumpTime: " + createdPost.getLastBump());
 
-        return ResponseEntity.ok("Post created successfully");
+            return ResponseEntity.ok("Post created successfully");
+        } catch (UserIsBannedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user is banned");
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/comments/{post_id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity createComment(@PathVariable("post_id") Long postId,
                                         @RequestParam(name = "body") String commentBody,
                                         @RequestParam(name = "replyTo", required = false) Long repliedToCommentId,
-                                        @RequestParam(name = "image", required = false) MultipartFile commentImage) throws IOException {
+                                        @RequestParam(name = "image", required = false) MultipartFile commentImage,
+                                        @RequestParam(name = "token", required = false) String token) throws IOException {
         log.info("requested POST on /api/comments/" + postId);
 
         if (commentImage != null) {
-            String fileExtension = Helper.getFileExtension(commentImage.getOriginalFilename());
+            String fileExtension = Helper.getFileExtension(commentImage.getOriginalFilename()).toLowerCase();
             if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
                 return ResponseEntity.badRequest().body("unsupported media type");
             }
         }
 
-        Comment savedComment = postingService.createComment(postId, commentBody, repliedToCommentId, commentImage);
+        try {
+            Comment savedComment = postingService.createComment(postId, commentBody, repliedToCommentId, commentImage, token);
 
-        log.info("posted to database: \n");
-        log.info("postId: " + savedComment.getPostId());
-        log.info("body: " + savedComment.getBody());
-        log.info("imageName: " + savedComment.getImageName());
-        log.info("createdAt: " + savedComment.getCreatedAt());
-        log.info("repliedTo: " + savedComment.getRepliedToCommentId());
+            log.info("posted to database: \n");
+            log.info("postId: " + savedComment.getPostId());
+            log.info("body: " + savedComment.getBody());
+            log.info("imageName: " + savedComment.getImageName());
+            log.info("createdAt: " + savedComment.getCreatedAt());
+            log.info("repliedTo: " + savedComment.getRepliedToCommentId());
 
-        return ResponseEntity.ok().body("Comment created successfully");
+            return ResponseEntity.ok().body("Comment created successfully");
+        } catch (UserIsBannedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user is banned");
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/pictures/{picture_name}")

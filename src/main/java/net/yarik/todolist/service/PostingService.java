@@ -2,8 +2,11 @@ package net.yarik.todolist.service;
 
 import net.yarik.todolist.Helper;
 import net.yarik.todolist.controller.ApiController;
+import net.yarik.todolist.exceptions.UserIsBannedException;
+import net.yarik.todolist.model.BannedUser;
 import net.yarik.todolist.model.Comment;
 import net.yarik.todolist.model.Post;
+import net.yarik.todolist.repository.BannedUserRepository;
 import net.yarik.todolist.repository.CommentRepository;
 import net.yarik.todolist.repository.PostRepository;
 import org.slf4j.Logger;
@@ -36,6 +39,9 @@ public class PostingService {
     private CommentRepository commentRepository;
 
     @Autowired
+    private BannedUserRepository bannedUserRepository;
+
+    @Autowired
     private StorageService storageService;
 
 
@@ -54,7 +60,13 @@ public class PostingService {
         return commentRepository.findByPostId(postId);
     }
 
-    public Post createPost(String postTitle, String postBody, MultipartFile postImage) throws IOException {
+    public Post createPost(String postTitle, String postBody, MultipartFile postImage, String token) throws IOException, UserIsBannedException {
+
+        List<BannedUser> bannedUser = bannedUserRepository.findByToken(token);
+        if (!bannedUser.isEmpty()) {
+            throw new UserIsBannedException("user is banned");
+        }
+
         Post post = new Post();
 
         LocalDateTime now = LocalDateTime.now();
@@ -77,7 +89,13 @@ public class PostingService {
     }
 
     @Transactional
-    public Comment createComment(Long postId, String commentBody, Long repliedToCommentId, MultipartFile commentImage) throws IOException {
+    public Comment createComment(Long postId, String commentBody, Long repliedToCommentId, MultipartFile commentImage, String token) throws IOException, UserIsBannedException {
+
+        List<BannedUser> bannedUser = bannedUserRepository.findByToken(token);
+        if (!bannedUser.isEmpty()) {
+            throw new UserIsBannedException("user is banned");
+        }
+
         Comment comment = new Comment();
 
         LocalDateTime now = LocalDateTime.now();
