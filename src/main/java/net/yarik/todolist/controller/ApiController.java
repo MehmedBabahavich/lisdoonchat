@@ -1,6 +1,8 @@
 package net.yarik.todolist.controller;
 
-import net.yarik.todolist.Helper;
+import net.yarik.todolist.exceptions.UserDoesNotExist;
+import net.yarik.todolist.service.BanService;
+import net.yarik.todolist.service.HelperService;
 import net.yarik.todolist.exceptions.UserIsBannedException;
 import net.yarik.todolist.model.Comment;
 import net.yarik.todolist.model.Post;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api")
@@ -31,6 +31,12 @@ public class ApiController {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private HelperService helperService;
+
+    @Autowired
+    private BanService banService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/posts")
     public ResponseEntity getAllPosts() {
@@ -61,7 +67,7 @@ public class ApiController {
         log.info("requested POST on /api/posts");
 
         if (postImage != null) {
-            String fileExtension = Helper.getFileExtension(postImage.getOriginalFilename()).toLowerCase();
+            String fileExtension = helperService.getFileExtension(postImage.getOriginalFilename()).toLowerCase();
             if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
                 return ResponseEntity.badRequest().body("unsupported media type");
             }
@@ -92,7 +98,7 @@ public class ApiController {
         log.info("requested POST on /api/comments/" + postId);
 
         if (commentImage != null) {
-            String fileExtension = Helper.getFileExtension(commentImage.getOriginalFilename()).toLowerCase();
+            String fileExtension = helperService.getFileExtension(commentImage.getOriginalFilename()).toLowerCase();
             if (!fileExtension.equals(".png") && !fileExtension.equals(".jpg") && !fileExtension.equals(".jpeg")) {
                 return ResponseEntity.badRequest().body("unsupported media type");
             }
@@ -121,5 +127,58 @@ public class ApiController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
         return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/token/{token}")
+    public ResponseEntity tokenCheck(@PathVariable("token") String token) {
+        return ResponseEntity.ok(helperService.tokenCheck(token));
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/posts/{id}")
+    public ResponseEntity deletePost(@PathVariable("id") Long postId,
+                                     @RequestParam("token") String token) {
+        if (!helperService.tokenCheck(token).equals("admin")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("access denied");
+        }
+
+        postingService.deletePost(postId);
+        return ResponseEntity.ok("post deleted successfully");
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/comments/{id}")
+    public ResponseEntity deleteComment(@PathVariable("id") Long commentId,
+                                        @RequestParam String token) {
+        if (!helperService.tokenCheck(token).equals("admin")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("access denied");
+        }
+
+        postingService.deleteComment(commentId);
+        return ResponseEntity.ok("comment deleted successfully");
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/ban-user/{user_token}")
+    public ResponseEntity banUser(@PathVariable("user_token") String userToken,
+                                  @RequestParam("token") String token) {
+        if (!helperService.tokenCheck(token).equals("admin")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("access denied");
+        }
+
+        banService.banUser(userToken);
+        return ResponseEntity.ok("user banned successfully");
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/unban-user/{user_token}")
+    public ResponseEntity unbanUser(@PathVariable("user_token") String userToken,
+                                    @RequestParam("token") String token) {
+        if (!helperService.tokenCheck(token).equals("admin")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("access denied");
+        }
+
+        try {
+            banService.unbanUser(userToken);
+            return ResponseEntity.ok("user unbanned successfully");
+        } catch (UserDoesNotExist e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("user does not exist");
+        }
     }
 }

@@ -1,6 +1,5 @@
 package net.yarik.todolist.service;
 
-import net.yarik.todolist.Helper;
 import net.yarik.todolist.controller.ApiController;
 import net.yarik.todolist.exceptions.UserIsBannedException;
 import net.yarik.todolist.model.BannedUser;
@@ -12,10 +11,6 @@ import net.yarik.todolist.repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +34,7 @@ public class PostingService {
     private CommentRepository commentRepository;
 
     @Autowired
-    private BannedUserRepository bannedUserRepository;
+    private HelperService helperService;
 
     @Autowired
     private StorageService storageService;
@@ -62,8 +57,7 @@ public class PostingService {
 
     public Post createPost(String postTitle, String postBody, MultipartFile postImage, String token) throws IOException, UserIsBannedException {
 
-        List<BannedUser> bannedUser = bannedUserRepository.findByToken(token);
-        if (!bannedUser.isEmpty()) {
+        if (helperService.tokenCheck(token).equals("banned")) {
             throw new UserIsBannedException("user is banned");
         }
 
@@ -91,8 +85,7 @@ public class PostingService {
     @Transactional
     public Comment createComment(Long postId, String commentBody, Long repliedToCommentId, MultipartFile commentImage, String token) throws IOException, UserIsBannedException {
 
-        List<BannedUser> bannedUser = bannedUserRepository.findByToken(token);
-        if (!bannedUser.isEmpty()) {
+        if (helperService.tokenCheck(token).equals("banned")) {
             throw new UserIsBannedException("user is banned");
         }
 
@@ -125,5 +118,13 @@ public class PostingService {
         });
 
         return savedComment;
+    }
+
+    public void deletePost(Long postId) {
+        postRepository.deleteById(postId);
+    }
+
+    public void deleteComment(Long commentId) {
+        commentRepository.deleteById(commentId);
     }
 }
